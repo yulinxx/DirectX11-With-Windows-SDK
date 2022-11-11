@@ -39,7 +39,10 @@ D3DApp::D3DApp(HINSTANCE hInstance, const std::wstring& windowName, int initWidt
     m_Minimized(false),
     m_Maximized(false),
     m_Resizing(false),
-    m_Enable4xMsaa(true),
+
+    m_Enable4xMsaa(true),   // 抗锯齿
+    // m_Enable4xMsaa(false),
+
     m_4xMsaaQuality(0),
     m_pd3dDevice(nullptr),
     m_pd3dImmediateContext(nullptr),
@@ -433,9 +436,6 @@ bool D3DApp::InitDirect3D()
         DXGI_FORMAT_R8G8B8A8_UNORM, 4, &m_4xMsaaQuality);
     assert(m_4xMsaaQuality > 0);
 
-
-
-
     ComPtr<IDXGIDevice> dxgiDevice = nullptr;
     ComPtr<IDXGIAdapter> dxgiAdapter = nullptr;
     ComPtr<IDXGIFactory1> dxgiFactory1 = nullptr;	// D3D11.0(包含DXGI1.1)的接口类
@@ -454,6 +454,7 @@ bool D3DApp::InitDirect3D()
     {
         HR(m_pd3dDevice.As(&m_pd3dDevice1));
         HR(m_pd3dImmediateContext.As(&m_pd3dImmediateContext1));
+
         // 填充各种结构体用以描述交换链
         DXGI_SWAP_CHAIN_DESC1 sd;
         ZeroMemory(&sd, sizeof(sd));
@@ -517,8 +518,6 @@ bool D3DApp::InitDirect3D()
         sd.Flags = 0;
         HR(dxgiFactory1->CreateSwapChain(m_pd3dDevice.Get(), &sd, m_pSwapChain.GetAddressOf()));
     }
-
-
 
     // 可以禁止alt+enter全屏
     dxgiFactory1->MakeWindowAssociation(m_hMainWnd, DXGI_MWA_NO_ALT_ENTER | DXGI_MWA_NO_WINDOW_CHANGES);

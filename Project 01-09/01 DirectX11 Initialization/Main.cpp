@@ -1,6 +1,9 @@
 #include "GameApp.h"
 
 
+// DirectX11 With Windows SDK--26 计算着色器：入门 - X_Jun - 博客园
+// https://www.cnblogs.com/X-Jun/p/10340652.html
+// https://www.cnblogs.com/X-Jun/p/9028764.html
 
 int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE prevInstance,
     _In_ LPSTR cmdLine, _In_ int showCmd)

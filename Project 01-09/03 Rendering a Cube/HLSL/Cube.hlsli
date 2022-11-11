@@ -1,4 +1,8 @@
 
+// register(b0) 指的是该常量缓冲区位于寄存器索引为0的缓冲区
+
+// 在HLSL中，常量缓冲区的变量类似于C++这边的全局常量，供着色器代码使用
+// cbuffer 用于声明一个常量缓冲区
 cbuffer ConstantBuffer : register(b0)
 {
     matrix g_World; // matrix可以用float4x4替代。不加row_major的情况下，矩阵默认为列主矩阵，

@@ -13,6 +13,7 @@ public:
         static const D3D11_INPUT_ELEMENT_DESC inputLayout[2];
     };
 
+    // 常量缓冲区 的对应 HLSL中的常量缓冲区结构体
     struct ConstantBuffer
     {
         DirectX::XMMATRIX world;
