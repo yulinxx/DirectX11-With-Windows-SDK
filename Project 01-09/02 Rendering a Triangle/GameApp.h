@@ -27,7 +27,8 @@ private:
     bool InitEffect();
     bool InitResource();
 
-
+private:
+    int m_nDrawCount = 0;
 
 private:
     ComPtr<ID3D11InputLayout> m_pVertexLayout;	// 顶点输入布局
