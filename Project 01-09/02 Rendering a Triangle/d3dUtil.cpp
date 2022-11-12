@@ -1,5 +1,14 @@
 #include "d3dUtil.h"
 
+// ------------------------------
+// CreateShaderFromFile函数
+// ------------------------------
+// [In]csoFileNameInOut 编译好的着色器二进制文件(.cso)，若有指定则优先寻找该文件并读取
+// [In]hlslFileName     着色器代码，若未找到着色器二进制文件则编译着色器代码
+// [In]entryPoint       入口点(指定开始的函数)
+// [In]shaderModel      着色器模型，格式为"*s_5_0"，*可以为c,d,g,h,p,v之一
+// [Out]ppBlobOut       输出着色器二进制信息
+
 HRESULT CreateShaderFromFile(
     const WCHAR* csoFileNameInOut,
     const WCHAR* hlslFileName,
@@ -10,6 +19,9 @@ HRESULT CreateShaderFromFile(
     HRESULT hr = S_OK;
 
     // 寻找是否有已经编译好的顶点着色器
+    // D3DReadFileToBlob函数--读取编译好的着色器二进制信息 1 [In].cso文件名 2 [Out]获取二进制大数据块
+    // https://www.cnblogs.com/X-Jun/p/10066282.html
+
     if (csoFileNameInOut && D3DReadFileToBlob(csoFileNameInOut, ppBlobOut) == S_OK)
     {
         return hr;
