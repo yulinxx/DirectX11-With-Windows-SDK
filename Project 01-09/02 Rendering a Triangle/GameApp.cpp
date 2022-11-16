@@ -33,12 +33,15 @@ GameApp::~GameApp()
 
 bool GameApp::Init()
 {
+    // 初始化窗口 及 D3D
     if (!D3DApp::Init())
         return false;
 
+    // 初始化窗口
     if (!InitEffect())
         return false;
-
+    
+    // 初始化数据
     if (!InitResource())
         return false;
 
