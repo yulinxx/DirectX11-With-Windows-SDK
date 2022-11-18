@@ -5,6 +5,9 @@ using namespace DirectX;
 
 #define DRAW_TRIANGLE  1
 
+
+////////////////////////////////////////////////////////////////////////
+
 // 建立C++结构体与HLSL结构体(VertexIn)的对应关系
 // typedef struct D3D11_INPUT_ELEMENT_DESC
 // {
@@ -22,6 +25,9 @@ const D3D11_INPUT_ELEMENT_DESC GameApp::VertexPosColor::inputLayout[2] = {
     { "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 }
 };
 
+
+////////////////////////////////////////////////////////////////////////
+
 GameApp::GameApp(HINSTANCE hInstance, const std::wstring& windowName, int initWidth, int initHeight)
     : D3DApp(hInstance, windowName, initWidth, initHeight)
 {
@@ -30,6 +36,7 @@ GameApp::GameApp(HINSTANCE hInstance, const std::wstring& windowName, int initWi
 GameApp::~GameApp()
 {
 }
+
 
 bool GameApp::Init()
 {
@@ -82,6 +89,8 @@ bool GameApp::InitEffect()
 {
     ComPtr<ID3DBlob> blob;
 
+    // 使用CreateVertexShader/CreatePixelShader创建顶点和像素着色器。
+
     // 创建顶点着色器
     // HRESULT ID3D11Device::CreateVertexShader( 
     // const void *pShaderBytecode,            // [In]着色器字节码
@@ -92,7 +101,7 @@ bool GameApp::InitEffect()
     HR(CreateShaderFromFile(L"HLSL\\Triangle_VS.cso", L"HLSL\\Triangle_VS.hlsl", "VS", "vs_5_0", blob.ReleaseAndGetAddressOf()));
     HR(m_pd3dDevice->CreateVertexShader(blob->GetBufferPointer(), blob->GetBufferSize(), nullptr, m_pVertexShader.GetAddressOf()));
     
-    // 创建并绑定顶点布局
+    // 创建并绑定顶点布局  创建顶点输入布局是为了要让着色器知道按照何种规则读取输入的顶点数据。
     // HRESULT ID3D11Device::CreateInputLayout( 
     // const D3D11_INPUT_ELEMENT_DESC *pInputElementDescs, // [In]输入布局描述
     // UINT NumElements,                                   // [In]上述数组元素个数
@@ -116,6 +125,7 @@ bool GameApp::InitResource()
     VertexPosColor vertices[] =
     {
         #if DRAW_TRIANGLE
+        //           x     y     z              r     g     b    a
         { XMFLOAT3(0.0f, 0.5f, 0.5f), XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f) },
         { XMFLOAT3(0.5f, -0.5f, 0.5f), XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f) },
         { XMFLOAT3(-0.5f, -0.8f, 0.5f), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f) }
@@ -138,10 +148,10 @@ bool GameApp::InitResource()
     vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;   // 缓冲区类型的标志
     vbd.CPUAccessFlags = 0;                     // CPU读写权限的指定
 
-    // 新建顶点缓冲区
+    // 新建顶点缓冲区 D3D11_SUBRESOURCE_DATA存放真实顶点数据
     D3D11_SUBRESOURCE_DATA InitData;
     ZeroMemory(&InitData, sizeof(InitData));
-    InitData.pSysMem = vertices;    // 用于初始化的数据
+    InitData.pSysMem = vertices;    // 用于初始化的数据 为缓冲区指定初始化数据
     HR(m_pd3dDevice->CreateBuffer(&vbd, &InitData, m_pVertexBuffer.GetAddressOf()));
 
 
@@ -153,6 +163,8 @@ bool GameApp::InitResource()
     UINT stride = sizeof(VertexPosColor);	// 跨越字节数
     UINT offset = 0;						// 起始偏移量
 
+    // 绑定顶点缓存到管线
+    // 使用ID3D11DeviceContext::IASetVertexBuffers绑定到输入装配器阶段（Input-Assember Stage）
     // void ID3D11DeviceContext::IASetVertexBuffers( 
     // UINT StartSlot,     // [In]输入槽索引
     // UINT NumBuffers,    // [In]缓冲区数目
@@ -161,7 +173,8 @@ bool GameApp::InitResource()
     // const UINT *pOffsets);  // [In]一个数组，规定了对所有缓冲区的初始字节偏移量
     m_pd3dImmediateContext->IASetVertexBuffers(0, 1, m_pVertexBuffer.GetAddressOf(), &stride, &offset);
 
-    // 设置图元类型，设定输入布局
+    // 设置图元拓扑 即设置图元类型，设定输入布局 
+    // 图元拓扑表示告诉D3D，输入的顶点如何相连。
     #if DRAW_TRIANGLE
     m_pd3dImmediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
     #else
@@ -171,7 +184,7 @@ bool GameApp::InitResource()
     // m_pd3dImmediateContext->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
     m_pd3dImmediateContext->IASetInputLayout(m_pVertexLayout.Get());
 
-    // 将着色器绑定到渲染管线
+    // 绑定着色器对象到管线 将着色器绑定到渲染管线
     m_pd3dImmediateContext->VSSetShader(m_pVertexShader.Get(), nullptr, 0);
     m_pd3dImmediateContext->PSSetShader(m_pPixelShader.Get(), nullptr, 0);
 
