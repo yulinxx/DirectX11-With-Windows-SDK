@@ -5,13 +5,20 @@ using namespace DirectX;
 
 #define DRAW_TRIANGLE  1
 
+// 绘制过程
+// 要在DX上绘制一个基本图形，大体流程有以下几步
 
+// 给出输入布局（主要是描述顶点的格式）
+// 给出描述几何体的顶点，索引，拓扑图元
+// 加载并创建各种着色器
+// 创建索引缓冲，顶点缓冲，以及必要的常量缓冲
+// 将以上内容绑定到渲染管线，然后绘制
 ////////////////////////////////////////////////////////////////////////
 
-// 建立C++结构体与HLSL结构体(VertexIn)的对应关系
+// 建立C++结构体与HLSL结构体(VertexIn)的对应关系, 顶点数据描述结构体
 // typedef struct D3D11_INPUT_ELEMENT_DESC
 // {
-//     LPCSTR SemanticName;        // 语义名 语义名要与HLSL结构体中的语义名相同
+//     LPCSTR SemanticName;        // 语义名 语义名要与HLSL结构体中的语义名相同, 用于将顶点结构体中的元素映射为顶点着色器参数
 //     UINT SemanticIndex;         // 语义索引
 //     DXGI_FORMAT Format;         // 数据格式
 //     UINT InputSlot;             // 输入槽索引(0-15)
@@ -44,7 +51,7 @@ bool GameApp::Init()
     if (!D3DApp::Init())
         return false;
 
-    // 初始化窗口
+    // 初始化着色器
     if (!InitEffect())
         return false;
     
@@ -79,8 +86,9 @@ void GameApp::DrawScene()
     // UINT VertexCount,           // [In]需要绘制的顶点数目
     // UINT StartVertexLocation);  // [In]起始顶点索引
 
+    //**********************************************
     // 从输入装配阶段开始，该绘制的进行将会经历一次完整的渲染管线阶段，直到输出合并阶段为止。
-    m_pd3dImmediateContext->Draw(m_nDrawCount, 0);
+    m_pd3dImmediateContext->Draw(m_nDrawCount, 0);  // 渲染
 
     HR(m_pSwapChain->Present(0, 0));
 }
@@ -105,7 +113,7 @@ bool GameApp::InitEffect()
     HR(CreateShaderFromFile(L"HLSL\\Triangle_VS.cso", L"HLSL\\Triangle_VS.hlsl", "VS", "vs_5_0", blob.ReleaseAndGetAddressOf()));
     HR(m_pd3dDevice->CreateVertexShader(blob->GetBufferPointer(), blob->GetBufferSize(), nullptr, m_pVertexShader.GetAddressOf()));
     
-    // 创建并绑定顶点布局  创建顶点输入布局是为了要让着色器知道按照何种规则读取输入的顶点数据。
+    // 创建并绑定顶点布局  创建顶点输入布局是为了要让着色器知道按照何种规则读取输入的顶点数据。 输入布局（主要是描述顶点的格式）
     // HRESULT ID3D11Device::CreateInputLayout( 
     // const D3D11_INPUT_ELEMENT_DESC *pInputElementDescs, // [In]输入布局描述
     // UINT NumElements,                                   // [In]上述数组元素个数
@@ -144,6 +152,15 @@ bool GameApp::InitResource()
 
     m_nDrawCount = sizeof(vertices) / (sizeof(XMFLOAT3) + sizeof(XMFLOAT4));
 
+    //**********************************************
+    // 为了让GPU能够读取顶点, 他们需要被存放在一个名为buffer的结构里, 这个buffer由 ID3D11Buffer 定义. 
+    // 存放顶点的buffer就叫做vertex buffer. 
+    // 但是需要注意, D3D的buffer不仅仅存放数据, 数据的描述和绑定到渲染管线的位置也存储在这里.
+    // 创建vertex buffer需要三个步骤:
+    // 1. 设置 D3D11_BUFFER_DESC 结构来描述buffer.
+    // 2. 设置 D3D11_SUBRESOURCE_DATA 结构, 他指定了我们想要初始化缓冲区内容的数据.
+    // 3. 调用 ID3D11Device::CreateBuffer 创建 vertex buffer.
+
     // 设置顶点缓冲区描述
     D3D11_BUFFER_DESC vbd;
     ZeroMemory(&vbd, sizeof(vbd));
@@ -158,39 +175,40 @@ bool GameApp::InitResource()
     InitData.pSysMem = vertices;    // 用于初始化的数据 为缓冲区指定初始化数据
 
     // 创建顶点缓冲
-    HR(m_pd3dDevice->CreateBuffer(&vbd, &InitData, m_pVertexBuffer.GetAddressOf()));
+    HR(m_pd3dDevice->CreateBuffer(&vbd, &InitData, m_pVertexBuffer.GetAddressOf()));    // 创建
 
 
-    // ******************
-    // 给渲染管线各个阶段绑定好所需资源
+    //**********************************************
+    // 将 Vertex Buffer 绑定到 Input Slot, 给渲染管线各个阶段绑定好所需资源
 
     // 输入装配阶段的顶点缓冲区设置
     UINT stride = sizeof(VertexPosColor);	// 跨越字节数
     UINT offset = 0;						// 起始偏移量
 
-    // 绑定顶点缓存到管线
+    // 绑定顶点缓存到管线 用来设置一个或多个顶点缓存
     // 使用ID3D11DeviceContext::IASetVertexBuffers绑定到输入装配器阶段（Input-Assember Stage）
     // void ID3D11DeviceContext::IASetVertexBuffers( 
-    // UINT StartSlot,     // [In]输入槽索引
-    // UINT NumBuffers,    // [In]缓冲区数目
-    // ID3D11Buffer *const *ppVertexBuffers,   // [In]指向缓冲区数组的指针
-    // const UINT *pStrides,   // [In]一个数组，规定了对所有缓冲区每次读取的字节数分别是多少
-    // const UINT *pOffsets);  // [In]一个数组，规定了对所有缓冲区的初始字节偏移量
-    m_pd3dImmediateContext->IASetVertexBuffers(0, 1, m_pVertexBuffer.GetAddressOf(), &stride, &offset);
+    // UINT StartSlot,     // [In]输入槽索引，就是传递过去的创建好的顶点缓存数组中的第一个要使用的缓存序号。序号从0到15.
+    // UINT NumBuffers,    // [In]缓冲区数目,  要绑定的 buffer 的数量, 传进去的顶点缓存数量
+    // ID3D11Buffer *const *ppVertexBuffers,   // [In]指向缓冲区数组的指针, 一个或多个缓存数组
+    // const UINT *pStrides,   // [In]一个数组，规定了对所有缓冲区每次读取的字节数分别是多少，它表示每个顶点的字节数
+    // const UINT *pOffsets);  // [In]一个数组，规定了对所有缓冲区的初始字节偏移量, 从缓存的开始位置到顶点的第一个元素的开始位置的字节偏移量
+    m_pd3dImmediateContext->IASetVertexBuffers(0, 1, m_pVertexBuffer.GetAddressOf(), &stride, &offset); // 设置
 
     // 设置图元拓扑 即设置图元类型，设定输入布局 
     // 图元拓扑表示告诉D3D，输入的顶点如何相连。即绘制什么图元
     #if DRAW_TRIANGLE
-    m_pd3dImmediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+    m_pd3dImmediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);  // 绘制
     #else
     m_pd3dImmediateContext->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_LINESTRIP);
     #endif
     // m_pd3dImmediateContext->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
     
+    // 绑定所创建的顶点布局，该函数只有一个单一的类型为 ID3D11InputLayout 的对象
     m_pd3dImmediateContext->IASetInputLayout(m_pVertexLayout.Get());
 
     // 绑定着色器对象到管线 将着色器绑定到渲染管线
-    m_pd3dImmediateContext->VSSetShader(m_pVertexShader.Get(), nullptr, 0);
+    m_pd3dImmediateContext->VSSetShader(m_pVertexShader.Get(), nullptr, 0); // 绑定
     m_pd3dImmediateContext->PSSetShader(m_pPixelShader.Get(), nullptr, 0);
 
     // ******************
