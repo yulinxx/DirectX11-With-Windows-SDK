@@ -87,6 +87,10 @@ void GameApp::DrawScene()
 
 bool GameApp::InitEffect()
 {
+    // I see ID3D10Blob as (I)(D3D10)(Blob).
+    // I = interface? D3D10 = direct3d 10? Blob = ?
+    // I've seen "Binary large object" online for Blob, 
+    // but I'm not sure if that has the same meaning in this context.
     ComPtr<ID3DBlob> blob;
 
     // 使用CreateVertexShader/CreatePixelShader创建顶点和像素着色器。
@@ -152,12 +156,13 @@ bool GameApp::InitResource()
     D3D11_SUBRESOURCE_DATA InitData;
     ZeroMemory(&InitData, sizeof(InitData));
     InitData.pSysMem = vertices;    // 用于初始化的数据 为缓冲区指定初始化数据
+
+    // 创建顶点缓冲
     HR(m_pd3dDevice->CreateBuffer(&vbd, &InitData, m_pVertexBuffer.GetAddressOf()));
 
 
     // ******************
     // 给渲染管线各个阶段绑定好所需资源
-    //
 
     // 输入装配阶段的顶点缓冲区设置
     UINT stride = sizeof(VertexPosColor);	// 跨越字节数
@@ -174,14 +179,14 @@ bool GameApp::InitResource()
     m_pd3dImmediateContext->IASetVertexBuffers(0, 1, m_pVertexBuffer.GetAddressOf(), &stride, &offset);
 
     // 设置图元拓扑 即设置图元类型，设定输入布局 
-    // 图元拓扑表示告诉D3D，输入的顶点如何相连。
+    // 图元拓扑表示告诉D3D，输入的顶点如何相连。即绘制什么图元
     #if DRAW_TRIANGLE
     m_pd3dImmediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
     #else
     m_pd3dImmediateContext->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_LINESTRIP);
     #endif
-
     // m_pd3dImmediateContext->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
+    
     m_pd3dImmediateContext->IASetInputLayout(m_pVertexLayout.Get());
 
     // 绑定着色器对象到管线 将着色器绑定到渲染管线
