@@ -49,6 +49,8 @@ add_executable(06_Use_ImGui WIN32 ${DIR_SRCS} ${HEADER_FILES} ${HLSL_FILES})
 target_link_libraries(06_Use_ImGui d3d11.lib dxgi.lib dxguid.lib D3DCompiler.lib winmm.lib)
 
 # ImGui
+# ImGUI又称为Dear ImGui，它是与平台无关的C++轻量级跨平台图形界面库，没有任何第三方依赖，
+# 可以将ImGUI的源码直接加到项目中使用，也可以编译成dll, ImGUI使用DX或者OpenGL进行界面渲染
 target_link_libraries(06_Use_ImGui ImGui)
 file(COPY imgui.ini DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 

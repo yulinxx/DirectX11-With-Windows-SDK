@@ -535,15 +535,17 @@ bool D3DApp::InitDirect3D()
     return true;
 }
 
+
+// 初始化 ImGui
 bool D3DApp::InitImGui()
 {
     IMGUI_CHECKVERSION();
-    ImGui::CreateContext();
+    ImGui::CreateContext(); // 主要加载ImGUI配置（Ini）相关的操作
     ImGuiIO& io = ImGui::GetIO();
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // 允许键盘控制
     io.ConfigWindowsMoveFromTitleBarOnly = true;              // 仅允许标题拖动
 
-    // 设置Dear ImGui风格
+    // 设置Dear ImGui风格. 元件的颜色初始化
     ImGui::StyleColorsDark();
 
     // 设置平台/渲染器后端
