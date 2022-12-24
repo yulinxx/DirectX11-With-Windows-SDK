@@ -3,7 +3,7 @@
 #include "DXTrace.h"
 using namespace DirectX;
 
-#define DRAW_TRIANGLE  1
+#define DRAW_TRIANGLE  0
 
 // 绘制过程
 // 要在DX上绘制一个基本图形，大体流程有以下几步
@@ -13,7 +13,13 @@ using namespace DirectX;
 // 创建并加载各种着色器
 // 创建索引缓冲，顶点缓冲，以及必要的常量缓冲
 // 将以上内容绑定到渲染管线，然后绘制
+
 ////////////////////////////////////////////////////////////////////////
+//  在shader中定义了顶点结构体之后，我们要用输入布局( ID3D11InputLayout )来描述该顶点结构体的分量结构，
+// 使D3D知道如何使用每个分量。
+// 输入布局是一个 D3D11_INPUT_ELEMENT_DESC （输入布局描述：input layout descrption）数组。
+// 数组中的每个元素描述了顶点结构体的一个分量
+// https://blog.csdn.net/qq_38319794/article/details/83055199
 
 // 建立C++结构体与HLSL结构体(VertexIn)的对应关系, 顶点数据描述结构体
 // typedef struct D3D11_INPUT_ELEMENT_DESC
