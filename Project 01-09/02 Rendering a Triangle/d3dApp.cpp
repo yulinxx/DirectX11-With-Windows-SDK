@@ -154,7 +154,6 @@ void D3DApp::OnResize()
     
     backBuffer.Reset();
 
-
     D3D11_TEXTURE2D_DESC depthStencilDesc;
 
     depthStencilDesc.Width = m_ClientWidth;
@@ -174,8 +173,6 @@ void D3DApp::OnResize()
         depthStencilDesc.SampleDesc.Count = 1;
         depthStencilDesc.SampleDesc.Quality = 0;
     }
-    
-
 
     depthStencilDesc.Usage = D3D11_USAGE_DEFAULT;
     depthStencilDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
@@ -185,7 +182,6 @@ void D3DApp::OnResize()
     // 创建深度缓冲区以及深度模板视图
     HR(m_pd3dDevice->CreateTexture2D(&depthStencilDesc, nullptr, m_pDepthStencilBuffer.GetAddressOf()));
     HR(m_pd3dDevice->CreateDepthStencilView(m_pDepthStencilBuffer.Get(), nullptr, m_pDepthStencilView.GetAddressOf()));
-
 
     // 将渲染目标视图和深度/模板缓冲区结合到管线
     m_pd3dImmediateContext->OMSetRenderTargets(1, m_pRenderTargetView.GetAddressOf(), m_pDepthStencilView.Get());

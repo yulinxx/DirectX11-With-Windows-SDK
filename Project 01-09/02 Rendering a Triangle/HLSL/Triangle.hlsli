@@ -5,7 +5,7 @@
 // POSITION	描述该变量是一个坐标点
 // COLOR	描述该变量是一个颜色
 // SV_POSITION	说明该顶点的位置在从顶点着色器输出后，后续的着色器都不能改变它的值，作为光栅化时最终确定的像素位置
-// SV_Target	说明输出的颜色值将会直接保存到渲染目标视图的后备缓冲区对应位置
+// SV_Target	说明输出的颜色值将会直接保存到渲染目标视图的后备缓冲区对应位置  ”SV“即"System Value"，系统值
 struct VertexIn
 {
     float3 pos : POSITION;

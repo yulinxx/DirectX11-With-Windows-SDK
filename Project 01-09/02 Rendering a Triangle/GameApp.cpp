@@ -191,7 +191,7 @@ bool GameApp::InitResource()
     UINT stride = sizeof(VertexPosColor);	// 跨越字节数
     UINT offset = 0;						// 起始偏移量
 
-    // 绑定顶点缓存到管线 用来设置一个或多个顶点缓存
+    // 绑定顶点缓存到管线 用来设置一个或多个顶点缓存 指定顶点缓存  
     // 使用ID3D11DeviceContext::IASetVertexBuffers绑定到输入装配器阶段（Input-Assember Stage）
     // void ID3D11DeviceContext::IASetVertexBuffers( 
     // UINT StartSlot,     // [In]输入槽索引，就是传递过去的创建好的顶点缓存数组中的第一个要使用的缓存序号。序号从0到15.
